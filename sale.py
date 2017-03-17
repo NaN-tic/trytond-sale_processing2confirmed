@@ -4,6 +4,7 @@
 from trytond.model import Workflow, ModelView
 from trytond.pool import PoolMeta, Pool
 from trytond.pyson import Eval
+from trytond.transaction import Transaction
 
 __all__ = ['Sale']
 
@@ -55,13 +56,15 @@ class Sale:
 
         if to_write:
             cls.write(*to_write)
-        if to_delete_invoices:
-            Invoice.delete(to_delete_invoices)
-        if to_delete_shipments:
-            ShipmentOut.delete(to_delete_shipments)
-        if to_delete_shipments_return:
-            ShipmentOutReturn.delete(to_delete_shipments_return)
-        if production_installed and to_delete_productions:
-            Production.delete(to_delete_productions)
+
+        with Transaction().set_user(0):
+            if to_delete_invoices:
+                Invoice.delete(to_delete_invoices)
+            if to_delete_shipments:
+                ShipmentOut.delete(to_delete_shipments)
+            if to_delete_shipments_return:
+                ShipmentOutReturn.delete(to_delete_shipments_return)
+            if production_installed and to_delete_productions:
+                Production.delete(to_delete_productions)
 
         super(Sale, cls).draft(sales)

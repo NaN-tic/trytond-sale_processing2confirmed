@@ -2,23 +2,28 @@
 Scenario Sale Processing to Confirmed
 =====================================
 
+""""
+Create a sale a process
+""""
+
 Imports::
 
     >>> import datetime
+    >>> import os
     >>> from dateutil.relativedelta import relativedelta
     >>> from decimal import Decimal
     >>> from operator import attrgetter
     >>> from proteus import config, Model, Wizard, Report
-    >>> from trytond.exceptions import UserError
     >>> from trytond.modules.company.tests.tools import create_company, \
     ...     get_company
     >>> from trytond.modules.account.tests.tools import create_fiscalyear, \
     ...     create_chart, get_accounts, create_tax
     >>> from trytond.modules.account_invoice.tests.tools import \
     ...     set_fiscalyear_invoice_sequences, create_payment_term
+    >>> from trytond.exceptions import UserError
     >>> today = datetime.date.today()
 
- Create database::
+Create database::
 
     >>> config = config.set_trytond()
     >>> config.pool.test = True
@@ -40,6 +45,36 @@ Reload the context::
     >>> User = Model.get('res.user')
     >>> Group = Model.get('res.group')
     >>> config._context = User.get_preferences(True, config.context)
+
+Create sale user::
+
+    >>> sale_user = User()
+    >>> sale_user.name = 'Sale'
+    >>> sale_user.login = 'sale'
+    >>> sale_user.main_company = company
+    >>> sale_group, = Group.find([('name', '=', 'Sales')])
+    >>> sale_user.groups.append(sale_group)
+    >>> sale_user.save()
+
+Create stock user::
+
+    >>> stock_user = User()
+    >>> stock_user.name = 'Stock'
+    >>> stock_user.login = 'stock'
+    >>> stock_user.main_company = company
+    >>> stock_group, = Group.find([('name', '=', 'Stock')])
+    >>> stock_user.groups.append(stock_group)
+    >>> stock_user.save()
+
+Create account user::
+
+    >>> account_user = User()
+    >>> account_user.name = 'Account'
+    >>> account_user.login = 'account'
+    >>> account_user.main_company = company
+    >>> account_group, = Group.find([('name', '=', 'Account')])
+    >>> account_user.groups.append(account_group)
+    >>> account_user.save()
 
 Create fiscal year::
 
@@ -72,30 +107,101 @@ Create parties::
     >>> supplier = Party(name='Supplier')
     >>> supplier.save()
     >>> customer = Party(name='Customer')
+    >>> customer.customer_tax_rule = None
     >>> customer.save()
+
+Create category account::
+
+    >>> Category = Model.get('product.category')
+    >>> category = Category()
+    >>> category.name = 'Taxable'
+    >>> category.customer_taxes.append(tax)
+    >>> category.accounting = True
+    >>> category.save()
 
 Create product::
 
     >>> ProductUom = Model.get('product.uom')
     >>> unit, = ProductUom.find([('name', '=', 'Unit')])
+    >>> gram, = ProductUom.find([('name', '=', 'Gram')])
+    >>> kilo, = ProductUom.find([('name', '=', 'Kilogram')])
+
     >>> ProductTemplate = Model.get('product.template')
     >>> Product = Model.get('product.product')
-    >>> product = Product()
+
+    >>> product1 = Product()
     >>> template = ProductTemplate()
-    >>> template.name = 'product'
+    >>> template.name = 'PROD1'
     >>> template.default_uom = unit
     >>> template.type = 'goods'
     >>> template.purchasable = True
     >>> template.salable = True
-    >>> template.list_price = Decimal('10')
-    >>> template.cost_price = Decimal('5')
+    >>> template.list_price = Decimal('10.0')
+    >>> template.cost_price = Decimal('5.0')
     >>> template.cost_price_method = 'fixed'
     >>> template.account_expense = expense
     >>> template.account_revenue = revenue
-    >>> template.customer_taxes.append(tax)
+    >>> template.taxes_category = True
+    >>> template.account_category = category
     >>> template.save()
-    >>> product.template = template
-    >>> product.save()
+    >>> product1.template = template
+    >>> product1.code = 'PROD1'
+    >>> product1.save()
+
+    >>> product2 = Product()
+    >>> template = ProductTemplate()
+    >>> template.name = 'PROD2'
+    >>> template.default_uom = gram
+    >>> template.type = 'goods'
+    >>> template.purchasable = True
+    >>> template.salable = True
+    >>> template.list_price = Decimal('10.0')
+    >>> template.cost_price = Decimal('5.0')
+    >>> template.cost_price_method = 'fixed'
+    >>> template.account_expense = expense
+    >>> template.account_revenue = revenue
+    >>> template.taxes_category = True
+    >>> template.account_category = category
+    >>> template.save()
+    >>> product2.template = template
+    >>> product2.code = 'PROD2'
+    >>> product2.save()
+
+    >>> product3 = Product()
+    >>> template = ProductTemplate()
+    >>> template.name = 'PROD3'
+    >>> template.default_uom = kilo
+    >>> template.type = 'goods'
+    >>> template.purchasable = True
+    >>> template.salable = True
+    >>> template.list_price = Decimal('10.0')
+    >>> template.cost_price = Decimal('5.0')
+    >>> template.cost_price_method = 'fixed'
+    >>> template.account_expense = expense
+    >>> template.account_revenue = revenue
+    >>> template.taxes_category = True
+    >>> template.account_category = category
+    >>> template.save()
+    >>> product3.template = template
+    >>> product3.code = 'PROD3'
+    >>> product3.save()
+
+    >>> service = Product()
+    >>> template = ProductTemplate()
+    >>> template.name = 'service'
+    >>> template.default_uom = unit
+    >>> template.type = 'service'
+    >>> template.salable = True
+    >>> template.list_price = Decimal('30')
+    >>> template.cost_price = Decimal('10')
+    >>> template.cost_price_method = 'fixed'
+    >>> template.account_expense = expense
+    >>> template.account_revenue = revenue
+    >>> template.taxes_category = True
+    >>> template.account_category = category
+    >>> template.save()
+    >>> service.template = template
+    >>> service.save()
 
 Create payment term::
 
@@ -104,6 +210,7 @@ Create payment term::
 
 Create an Inventory::
 
+    >>> config.user = stock_user.id
     >>> Inventory = Model.get('stock.inventory')
     >>> Location = Model.get('stock.location')
     >>> storage, = Location.find([
@@ -111,15 +218,22 @@ Create an Inventory::
     ...         ])
     >>> inventory = Inventory()
     >>> inventory.location = storage
-    >>> inventory_line = inventory.lines.new(product=product)
+    >>> inventory_line = inventory.lines.new(product=product1)
     >>> inventory_line.quantity = 100.0
+    >>> inventory_line.expected_quantity = 0.0
+    >>> inventory_line = inventory.lines.new(product=product2)
+    >>> inventory_line.quantity = 50.0
+    >>> inventory_line.expected_quantity = 0.0
+    >>> inventory_line = inventory.lines.new(product=product3)
+    >>> inventory_line.quantity = 20.0
     >>> inventory_line.expected_quantity = 0.0
     >>> inventory.click('confirm')
     >>> inventory.state
     u'done'
 
-Sale 5 products::
+Create a sale::
 
+    >>> config.user = sale_user.id
     >>> Sale = Model.get('sale.sale')
     >>> SaleLine = Model.get('sale.line')
     >>> sale = Sale()
@@ -128,16 +242,21 @@ Sale 5 products::
     >>> sale.invoice_method = 'order'
     >>> sale_line = SaleLine()
     >>> sale.lines.append(sale_line)
-    >>> sale_line.product = product
+    >>> sale_line.product = product1
     >>> sale_line.quantity = 2.0
     >>> sale_line = SaleLine()
     >>> sale.lines.append(sale_line)
-    >>> sale_line.type = 'comment'
-    >>> sale_line.description = 'Comment'
+    >>> sale_line.product = product2
+    >>> sale_line.quantity = 20.0
     >>> sale_line = SaleLine()
     >>> sale.lines.append(sale_line)
-    >>> sale_line.product = product
-    >>> sale_line.quantity = 3.0
+    >>> sale_line.product = product3
+    >>> sale_line.quantity = 10.0
+    >>> sale_line = SaleLine()
+    >>> sale.lines.append(sale_line)
+    >>> sale_line.product = service
+    >>> sale_line.quantity = 1
+    >>> sale.save()
     >>> sale.click('quote')
     >>> sale.click('confirm')
 
@@ -158,26 +277,31 @@ Process sale::
 
 Go back to confirmed on original sale::
 
-	>>> sale.state
-	u'processing'
-	>>> sale.click('draft')
-	>>> sale.state
-	u'draft'
+    >>> sale.state
+    u'processing'
+    >>> sale.click('draft')
+    >>> sale.state
+    u'draft'
     >>> len(sale.shipments), len(sale.shipment_returns), len(sale.invoices)
     (0, 0, 0)
 
-Post invoice::
+Process posted invoice sales::
 
     >>> posted_invoice_sale.click('quote')
     >>> posted_invoice_sale.click('confirm')
 	  >>> posted_invoice_sale.click('process')
+    >>> invoices = [invoice for invoice in posted_invoice_sale.invoices]
+
+Post invoice::
+
+    >>> config.user = account_user.id
     >>> Invoice = Model.get('account.invoice')
-    >>> for invoice in posted_invoice_sale.invoices:
+    >>> for invoice in invoices:
     ...     invoice.click('post')
-    >>> sale.reload()
 
 Draft invoice sale::
 
+    >>> config.user = sale_user.id
     >>> try:
     ...     posted_invoice_sale.click('draft')
     ... except UserError:
@@ -191,6 +315,8 @@ Validate Shipments::
     >>> posted_shipment_sale.click('confirm')
     >>> posted_shipment_sale.click('process')
     >>> shipment, = posted_shipment_sale.shipments
+
+    >>> config.user = stock_user.id
     >>> shipment.click('assign_try')
     True
     >>> shipment.click('pack')
@@ -198,6 +324,7 @@ Validate Shipments::
 
 Draft shipment sale::
 
+    >>> config.user = sale_user.id
     >>> try:
     ...     posted_shipment_sale.click('draft')
     ... except:
