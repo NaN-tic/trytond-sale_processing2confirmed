@@ -3,7 +3,7 @@
 # the full copyright notices and license terms.
 from trytond.model import Workflow, ModelView
 from trytond.pool import PoolMeta, Pool
-from trytond.pyson import Eval, Not, If
+from trytond.pyson import Eval
 
 __all__ = ['Sale']
 
@@ -18,35 +18,23 @@ class Sale:
         cls._transitions.add(
                 ('processing', 'draft'),
                 )
-        cls._buttons.update({
-                'draft': {
-                    'invisible': ~Eval('state').in_(
-                        ['quotation', 'processing']),
-                    'icon': If(Eval('state') == 'quotation', 'tryton-go-next',
-                        'tryton-go-previous'),
-                    }
-        })
+        cls._buttons['draft']['invisible'] = ~Eval('state').in_(
+                        ['cancel', 'quotation', 'processing'])
 
     @classmethod
-    @ModelView.button
-    @Workflow.transition('draft')
     def draft(cls, sales):
         pool = Pool()
         Invoice = pool.get('account.invoice')
         ShipmentOut = pool.get('stock.shipment.out')
         ShipmentOutReturn = pool.get('stock.shipment.out.return')
 
-        production_installed = False
-        to_write = []
         # Check if production module is installed
-        try:
-            production_installed = sales[0].production is not None
-        except AttributeError:
-            pass
-
-        if production_installed:
+        production_installed = False
+        if hasattr(sales[0], 'productions'):
+            production_installed = True
             Production = pool.get('production')
 
+        to_write = []
         to_delete_invoices = []
         to_delete_shipments = []
         to_delete_shipments_return = []
@@ -67,10 +55,13 @@ class Sale:
 
         if to_write:
             cls.write(*to_write)
+        if to_delete_invoices:
             Invoice.delete(to_delete_invoices)
+        if to_delete_shipments:
             ShipmentOut.delete(to_delete_shipments)
+        if to_delete_shipments_return:
             ShipmentOutReturn.delete(to_delete_shipments_return)
-            if production_installed:
-                Production.delete(to_delete_productions)
+        if production_installed and to_delete_productions:
+            Production.delete(to_delete_productions)
 
         super(Sale, cls).draft(sales)
