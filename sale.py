@@ -34,12 +34,14 @@ class Sale:
         if hasattr(sales[0], 'productions'):
             production_installed = True
             Production = pool.get('production')
+            SaleProduction = pool.get('sale.line-production')
 
         to_write = []
         to_delete_invoices = []
         to_delete_shipments = []
         to_delete_shipments_return = []
         to_delete_productions = []
+        to_delete_prod_sale = []
         for sale in sales:
             if sale.state != 'processing':
                 continue
@@ -52,6 +54,8 @@ class Sale:
 
             if production_installed:
                 to_delete_productions += sale.productions
+                to_delete_prod_sale += SaleProduction.search([
+                    ('sale_line', 'in', [s.id for s in sale.lines])])
             to_write.extend(([sale], {'state': 'draft'}))
 
         if to_write:
@@ -65,6 +69,7 @@ class Sale:
             if to_delete_shipments_return:
                 ShipmentOutReturn.delete(to_delete_shipments_return)
             if production_installed and to_delete_productions:
+                SaleProduction.delete(to_delete_prod_sale)
                 Production.delete(to_delete_productions)
 
         super(Sale, cls).draft(sales)
