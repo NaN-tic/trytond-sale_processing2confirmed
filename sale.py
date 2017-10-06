@@ -48,7 +48,7 @@ class Sale:
             if sale.invoices:
                 to_delete_invoices += sale.invoices
 
-            if sale.shipments or sale.shipments_returns:
+            if sale.shipments or sale.shipment_returns:
                 to_delete_shipments += sale.shipments
                 to_delete_shipments_return += sale.shipment_returns
 
