@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- This file is part of sale_processing2confirmed module for Tryton.
+The COPYRIGHT file at the top level of this repository contains the full
+copyright notices and license terms. -->
+<tryton>
+    <data>
+        <record model="res.group" id="group_sale_process2draft">
+            <field name="name">Sales process to draft</field>
+        </record>
+        <record model="res.user-res.group" id="user_admin_group_sale_process2draft">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_sale_process2draft"/>
+        </record>
+    </data>
+</tryton>

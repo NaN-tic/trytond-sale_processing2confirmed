@@ -1,7 +1,6 @@
 # This file is part of sale_confirmed2quotation module for Tryton.
 # The COPYRIGHT file at the top level of this repository contains
 # the full copyright notices and license terms.
-from trytond.model import Workflow, ModelView
 from trytond.pool import PoolMeta, Pool
 from trytond.pyson import Eval
 from trytond.transaction import Transaction
@@ -21,6 +20,10 @@ class Sale:
                 )
         cls._buttons['draft']['invisible'] = ~Eval('state').in_(
                         ['cancel', 'quotation', 'processing'])
+        cls._error_messages.update({
+                'user_group_process2draft': ('Only the users of the group '
+                    '"Sales process to draft" can draft a processing sale.'),
+                })
 
     @classmethod
     def draft(cls, sales):
@@ -28,6 +31,10 @@ class Sale:
         Invoice = pool.get('account.invoice')
         ShipmentOut = pool.get('stock.shipment.out')
         ShipmentOutReturn = pool.get('stock.shipment.out.return')
+        Group = pool.get('res.group')
+        ModelData = pool.get('ir.model.data')
+
+        transaction = Transaction()
 
         # Check if production module is installed
         production_installed = False
@@ -35,6 +42,12 @@ class Sale:
             production_installed = True
             Production = pool.get('production')
             SaleProduction = pool.get('sale.line-production')
+
+        user_id = transaction.user
+        if user_id != 0:
+            group = Group(ModelData.get_id('sale_processing2confirmed',
+                        'group_sale_process2draft')).id
+            groups = transaction.context['groups']
 
         to_write = []
         to_delete_invoices = []
@@ -45,6 +58,11 @@ class Sale:
         for sale in sales:
             if sale.state != 'processing':
                 continue
+
+            if user_id != 0:
+                if group not in groups:
+                    cls.raise_user_error('user_group_process2draft')
+
             if sale.invoices:
                 to_delete_invoices += sale.invoices
 

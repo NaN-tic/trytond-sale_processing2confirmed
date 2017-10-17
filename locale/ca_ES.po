@@ -1,0 +1,15 @@
+#
+msgid ""
+msgstr "Content-Type: text/plain; charset=utf-8\n"
+
+msgctxt "error:sale.sale:"
+msgid ""
+"Only the users of the group \"Sales process to draft\" can draft a "
+"processing sale."
+msgstr ""
+"Només els usuaris del grup \"Vendes procés a esborrany\" poden canviar una "
+"venta en procés a esborrany."
+
+msgctxt "model:res.group,name:group_sale_process2draft"
+msgid "Sales process to draft"
+msgstr "Vendes en procés a esborrany"
