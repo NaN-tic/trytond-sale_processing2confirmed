@@ -2,10 +2,6 @@
 Scenario Sale Processing to Confirmed
 =====================================
 
-""""
-Create a sale a process
-""""
-
 Imports::
 
     >>> import datetime
@@ -13,7 +9,8 @@ Imports::
     >>> from dateutil.relativedelta import relativedelta
     >>> from decimal import Decimal
     >>> from operator import attrgetter
-    >>> from proteus import config, Model, Wizard, Report
+    >>> from proteus import config, Model
+    >>> from trytond.tests.tools import activate_modules
     >>> from trytond.modules.company.tests.tools import create_company, \
     ...     get_company
     >>> from trytond.modules.account.tests.tools import create_fiscalyear, \
@@ -23,17 +20,10 @@ Imports::
     >>> from trytond.exceptions import UserError
     >>> today = datetime.date.today()
 
-Create database::
 
-    >>> config = config.set_trytond()
-    >>> config.pool.test = True
+Activate sale_confirmed2processing::
 
-Install sale::
-
-    >>> Module = Model.get('ir.module')
-    >>> sale_module, = Module.find([('name', '=', 'sale_processing2confirmed')])
-    >>> sale_module.click('install')
-    >>> Wizard('ir.module.install_upgrade').execute('upgrade')
+    >>> config = activate_modules('sale_processing2confirmed')
 
 Create company::
 
