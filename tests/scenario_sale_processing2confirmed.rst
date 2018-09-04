@@ -102,12 +102,14 @@ Create parties::
 
 Create category account::
 
-    >>> Category = Model.get('product.category')
-    >>> category = Category()
-    >>> category.name = 'Taxable'
-    >>> category.customer_taxes.append(tax)
-    >>> category.accounting = True
-    >>> category.save()
+    >>> ProductCategory = Model.get('product.category')
+    >>> account_category = ProductCategory()
+    >>> account_category.name = 'Taxable'
+    >>> account_category.account_expense = expense
+    >>> account_category.account_revenue = revenue
+    >>> account_category.customer_taxes.append(tax)
+    >>> account_category.accounting = True
+    >>> account_category.save()
 
 Create product::
 
@@ -117,9 +119,7 @@ Create product::
     >>> kilo, = ProductUom.find([('name', '=', 'Kilogram')])
 
     >>> ProductTemplate = Model.get('product.template')
-    >>> Product = Model.get('product.product')
 
-    >>> product1 = Product()
     >>> template = ProductTemplate()
     >>> template.name = 'PROD1'
     >>> template.default_uom = unit
@@ -127,18 +127,14 @@ Create product::
     >>> template.purchasable = True
     >>> template.salable = True
     >>> template.list_price = Decimal('10.0')
-    >>> template.cost_price = Decimal('5.0')
     >>> template.cost_price_method = 'fixed'
-    >>> template.account_expense = expense
-    >>> template.account_revenue = revenue
-    >>> template.taxes_category = True
-    >>> template.account_category = category
+    >>> template.account_category = account_category
     >>> template.save()
-    >>> product1.template = template
+    >>> product1, = template.products
     >>> product1.code = 'PROD1'
+    >>> product1.cost_price = Decimal('5.0')
     >>> product1.save()
 
-    >>> product2 = Product()
     >>> template = ProductTemplate()
     >>> template.name = 'PROD2'
     >>> template.default_uom = gram
@@ -146,18 +142,14 @@ Create product::
     >>> template.purchasable = True
     >>> template.salable = True
     >>> template.list_price = Decimal('10.0')
-    >>> template.cost_price = Decimal('5.0')
     >>> template.cost_price_method = 'fixed'
-    >>> template.account_expense = expense
-    >>> template.account_revenue = revenue
-    >>> template.taxes_category = True
-    >>> template.account_category = category
+    >>> template.account_category = account_category
     >>> template.save()
-    >>> product2.template = template
+    >>> product2, = template.products
     >>> product2.code = 'PROD2'
+    >>> product2.cost_price = Decimal('5.0')
     >>> product2.save()
 
-    >>> product3 = Product()
     >>> template = ProductTemplate()
     >>> template.name = 'PROD3'
     >>> template.default_uom = kilo
@@ -165,32 +157,25 @@ Create product::
     >>> template.purchasable = True
     >>> template.salable = True
     >>> template.list_price = Decimal('10.0')
-    >>> template.cost_price = Decimal('5.0')
     >>> template.cost_price_method = 'fixed'
-    >>> template.account_expense = expense
-    >>> template.account_revenue = revenue
-    >>> template.taxes_category = True
-    >>> template.account_category = category
+    >>> template.account_category = account_category
     >>> template.save()
-    >>> product3.template = template
+    >>> product3, = template.products
     >>> product3.code = 'PROD3'
+    >>> product3.cost_price = Decimal('5.0')
     >>> product3.save()
 
-    >>> service = Product()
     >>> template = ProductTemplate()
     >>> template.name = 'service'
     >>> template.default_uom = unit
     >>> template.type = 'service'
     >>> template.salable = True
     >>> template.list_price = Decimal('30')
-    >>> template.cost_price = Decimal('10')
     >>> template.cost_price_method = 'fixed'
-    >>> template.account_expense = expense
-    >>> template.account_revenue = revenue
-    >>> template.taxes_category = True
-    >>> template.account_category = category
+    >>> template.account_category = account_category
     >>> template.save()
-    >>> service.template = template
+    >>> service, = template.products
+    >>> service.cost_price = Decimal('10')
     >>> service.save()
 
 Create payment term::
