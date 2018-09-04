@@ -204,7 +204,7 @@ Create an Inventory::
     >>> inventory_line.expected_quantity = 0.0
     >>> inventory.click('confirm')
     >>> inventory.state
-    u'done'
+    'done'
 
 Create a sale::
 
@@ -246,17 +246,17 @@ Process sale::
 
     >>> sale.click('process')
     >>> sale.state
-    u'processing'
+    'processing'
     >>> len(sale.shipments), len(sale.shipment_returns), len(sale.invoices)
     (1, 0, 1)
 
 Go back to confirmed on original sale::
 
     >>> sale.state
-    u'processing'
+    'processing'
     >>> sale.click('draft')
     >>> sale.state
-    u'draft'
+    'draft'
     >>> len(sale.shipments), len(sale.shipment_returns), len(sale.invoices)
     (0, 0, 0)
 
@@ -264,7 +264,7 @@ Process posted invoice sales::
 
     >>> posted_invoice_sale.click('quote')
     >>> posted_invoice_sale.click('confirm')
-	  >>> posted_invoice_sale.click('process')
+	>>> posted_invoice_sale.click('process')
     >>> invoices = [invoice for invoice in posted_invoice_sale.invoices]
 
 Post invoice::
@@ -282,7 +282,7 @@ Draft invoice sale::
     ... except UserError:
     ...     pass
     >>> posted_invoice_sale.state
-    u'processing'
+    'processing'
 
 Validate Shipments::
 
@@ -305,4 +305,4 @@ Draft shipment sale::
     ... except:
     ...     pass
     >>> posted_shipment_sale.state
-    u'processing'
+    'processing'
