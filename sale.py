@@ -4,6 +4,8 @@
 from trytond.pool import PoolMeta, Pool
 from trytond.pyson import Eval
 from trytond.transaction import Transaction
+from trytond.i18n import gettext
+from trytond.exceptions import UserError
 
 __all__ = ['Sale']
 
@@ -15,14 +17,10 @@ class Sale(metaclass=PoolMeta):
     def __setup__(cls):
         super(Sale, cls).__setup__()
         cls._transitions.add(
-                ('processing', 'draft'),
+                ('processing', 'draft'),\
                 )
         cls._buttons['draft']['invisible'] = ~Eval('state').in_(
                         ['cancel', 'quotation', 'processing'])
-        cls._error_messages.update({
-                'user_group_process2draft': ('Only the users of the group '
-                    '"Sales process to draft" can draft a processing sale.'),
-                })
 
     @classmethod
     def draft(cls, sales):
@@ -60,7 +58,8 @@ class Sale(metaclass=PoolMeta):
 
             if user_id != 0:
                 if group not in groups:
-                    cls.raise_user_error('user_group_process2draft')
+                    raise UserError(gettext(
+                        'sale_processing2confirmed.user_group_process2draft'))
 
             if sale.invoices:
                 to_delete_invoices += sale.invoices
