@@ -244,7 +244,6 @@ Duplicate Sale::
 
 Process sale::
 
-    >>> sale.click('process')
     >>> sale.state
     'processing'
     >>> len(sale.shipments), len(sale.shipment_returns), len(sale.invoices)
@@ -264,7 +263,6 @@ Process posted invoice sales::
 
     >>> posted_invoice_sale.click('quote')
     >>> posted_invoice_sale.click('confirm')
-	>>> posted_invoice_sale.click('process')
     >>> invoices = [invoice for invoice in posted_invoice_sale.invoices]
 
 Post invoice::
@@ -277,10 +275,10 @@ Post invoice::
 Draft invoice sale::
 
     >>> config.user = sale_user.id
-    >>> try:
-    ...     posted_invoice_sale.click('draft')
-    ... except UserError:
-    ...     pass
+    >>> posted_invoice_sale.click('draft') # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+        ...
+    trytond.model.modelstorage.AccessError: ...
     >>> posted_invoice_sale.state
     'processing'
 
@@ -288,7 +286,6 @@ Validate Shipments::
 
     >>> posted_shipment_sale.click('quote')
     >>> posted_shipment_sale.click('confirm')
-    >>> posted_shipment_sale.click('process')
     >>> shipment, = posted_shipment_sale.shipments
 
     >>> config.user = stock_user.id
@@ -300,9 +297,9 @@ Validate Shipments::
 Draft shipment sale::
 
     >>> config.user = sale_user.id
-    >>> try:
-    ...     posted_shipment_sale.click('draft')
-    ... except:
-    ...     pass
+    >>> posted_invoice_sale.click('draft') # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+        ...
+    trytond.model.modelstorage.AccessError: ...
     >>> posted_shipment_sale.state
     'processing'
