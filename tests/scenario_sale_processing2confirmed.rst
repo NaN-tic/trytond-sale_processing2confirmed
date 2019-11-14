@@ -121,6 +121,7 @@ Create product::
     >>> template.list_price = Decimal('10.0')
     >>> template.cost_price_method = 'fixed'
     >>> template.account_category = account_category
+    >>> template.salable = True
     >>> template.save()
     >>> product1, = template.products
     >>> product1.code = 'PROD1'
@@ -134,6 +135,7 @@ Create product::
     >>> template.list_price = Decimal('10.0')
     >>> template.cost_price_method = 'fixed'
     >>> template.account_category = account_category
+    >>> template.salable = True
     >>> template.save()
     >>> product2, = template.products
     >>> product2.code = 'PROD2'
@@ -147,6 +149,7 @@ Create product::
     >>> template.list_price = Decimal('10.0')
     >>> template.cost_price_method = 'fixed'
     >>> template.account_category = account_category
+    >>> template.salable = True
     >>> template.save()
     >>> product3, = template.products
     >>> product3.code = 'PROD3'
@@ -161,6 +164,7 @@ Create product::
     >>> template.list_price = Decimal('30')
     >>> template.cost_price_method = 'fixed'
     >>> template.account_category = account_category
+    >>> template.salable = True
     >>> template.save()
     >>> service, = template.products
     >>> service.cost_price = Decimal('10')
