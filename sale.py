@@ -20,7 +20,7 @@ class Sale(metaclass=PoolMeta):
                 ('processing', 'draft'),\
                 )
         cls._buttons['draft']['invisible'] = ~Eval('state').in_(
-                        ['cancel', 'quotation', 'processing'])
+                        ['cancelled', 'quotation', 'processing'])
 
     @classmethod
     def draft(cls, sales):
