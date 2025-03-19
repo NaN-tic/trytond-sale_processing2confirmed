@@ -3,7 +3,7 @@
 this repository contains the full copyright notices and license terms. -->
 <tryton>
     <data grouped="1">
-    <record model="ir.message" id="user_group_process2draft">
+    <record model="ir.message" id="msg_user_group_process2draft">
         <field name="text">Only the users of the group "Sales process to draft" can draft a processing sale.</field>
     </record>
     </data>
