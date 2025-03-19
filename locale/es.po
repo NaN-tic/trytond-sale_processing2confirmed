@@ -2,14 +2,14 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
-msgctxt "error:sale.sale:"
+msgctxt "model:res.group,name:group_sale_process2draft"
+msgid "Sales process to draft"
+msgstr "Ventas en proceso a borrador"
+
+msgctxt "model:ir.message,text:msg_user_group_process2draft"
 msgid ""
 "Only the users of the group \"Sales process to draft\" can draft a "
 "processing sale."
 msgstr ""
 "Sólo los usuarios del grupo \"Ventas en proceso a borrador\" pueden cambiar "
 "una venta en proceso a borrador."
-
-msgctxt "model:res.group,name:group_sale_process2draft"
-msgid "Sales process to draft"
-msgstr "Ventas en proceso a borrador"
