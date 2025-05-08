@@ -79,8 +79,10 @@ class Sale(metaclass=PoolMeta):
             if to_delete_invoices:
                 Invoice.delete(to_delete_invoices)
             if to_delete_shipments:
+                ShipmentOut.draft(to_delete_shipments)
                 ShipmentOut.delete(to_delete_shipments)
             if to_delete_shipments_return:
+                ShipmentOutReturn.draft(to_delete_shipments_return)
                 ShipmentOutReturn.delete(to_delete_shipments_return)
             if production_installed and to_delete_productions:
                 SaleProduction.delete(to_delete_prod_sale)
