@@ -31,6 +31,9 @@ class Sale(metaclass=PoolMeta):
 
         transaction = Transaction()
 
+        if not sales:
+            return
+
         # Check if production module is installed
         production_installed = False
         if hasattr(sales[0], 'productions'):
@@ -88,4 +91,4 @@ class Sale(metaclass=PoolMeta):
                 SaleProduction.delete(to_delete_prod_sale)
                 Production.delete(to_delete_productions)
 
-        super(Sale, cls).draft(sales)
+        super().draft(sales)
