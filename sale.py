@@ -47,7 +47,6 @@ class Sale(metaclass=PoolMeta):
                         'group_sale_process2draft')).id
             groups = transaction.context['groups']
 
-        to_write = []
         to_delete_invoices = []
         to_delete_shipments = []
         to_delete_shipments_return = []
@@ -73,10 +72,7 @@ class Sale(metaclass=PoolMeta):
                 to_delete_productions += sale.productions
                 to_delete_prod_sale += SaleProduction.search([
                     ('sale_line', 'in', [s.id for s in sale.lines])])
-            to_write.extend(([sale], {'state': 'draft'}))
-
-        if to_write:
-            cls.write(*to_write)
+        super().draft(sales)
 
         with Transaction().set_user(0):
             if to_delete_invoices:
@@ -90,5 +86,3 @@ class Sale(metaclass=PoolMeta):
             if production_installed and to_delete_productions:
                 SaleProduction.delete(to_delete_prod_sale)
                 Production.delete(to_delete_productions)
-
-        super().draft(sales)
