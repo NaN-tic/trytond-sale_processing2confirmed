@@ -7,3 +7,7 @@ def register():
     Pool.register(
         sale.Sale,
         module='sale_processing2confirmed', type_='model')
+    Pool.register(
+        sale.SaleDropShipment,
+        module='sale_processing2confirmed', type_='model',
+        depends=['sale_draft', 'sale_supply_drop_shipment'])

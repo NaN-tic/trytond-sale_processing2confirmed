@@ -92,3 +92,59 @@ class Sale(metaclass=PoolMeta):
                 Production.delete(to_delete_productions)
 
         super().draft(sales)
+
+
+class SaleDropShipment(metaclass=PoolMeta):
+    __name__ = 'sale.sale'
+
+    @classmethod
+    def __setup__(cls):
+        super().__setup__()
+        cls._buttons['draft']['invisible'] = ~Eval('allow_draft', False)
+        if 'allow_draft' not in cls._buttons['draft']['depends']:
+            cls._buttons['draft']['depends'].append('allow_draft')
+
+    def get_allow_draft(self, name):
+        if not super().get_allow_draft(name):
+            return False
+        return all(shipment.state in {'draft', 'waiting', 'cancelled'}
+            for shipment in self.drop_shipments)
+
+    @classmethod
+    def draft(cls, sales):
+        pool = Pool()
+        DropShipment = pool.get('stock.shipment.drop')
+        PurchaseRequest = pool.get('purchase.request')
+        SaleLine = pool.get('sale.line')
+
+        drop_shipments = []
+        requests = []
+        lines = []
+        for sale in sales:
+            if any(shipment.state in {'shipped', 'done'}
+                    for shipment in sale.drop_shipments):
+                raise UserError(gettext(
+                        'sale_processing2confirmed'
+                        '.msg_sale_draft_drop_shipment',
+                        sale=sale.rec_name))
+            drop_shipments.extend(sale.drop_shipments)
+            for line in sale.lines:
+                request = line.purchase_request
+                if not request:
+                    continue
+                if request.purchase_line:
+                    if request.customer:
+                        lines.append(line)
+                else:
+                    requests.append(request)
+
+        if drop_shipments or requests or lines:
+            with Transaction().set_user(0):
+                DropShipment.cancel([shipment for shipment in drop_shipments
+                        if shipment.state != 'cancelled'])
+                DropShipment.delete(drop_shipments)
+                if requests:
+                    PurchaseRequest.delete(requests)
+                if lines:
+                    SaleLine.write(lines, {'purchase_request': None})
+        super().draft(sales)

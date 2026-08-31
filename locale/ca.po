@@ -13,3 +13,7 @@ msgid ""
 msgstr ""
 "Només els usuaris del grup \"Vendes procés a esborrany\" poden canviar una "
 "venta en procés a esborrany."
+
+msgctxt "model:ir.message,text:msg_sale_draft_drop_shipment"
+msgid "Sale \"%(sale)s\" cannot be returned to draft because it has shipped or completed direct shipments."
+msgstr "La venda \"%(sale)s\" no es pot passar a esborrany perquè té enviaments directes expedits o finalitzats."
