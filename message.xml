@@ -6,5 +6,8 @@ this repository contains the full copyright notices and license terms. -->
     <record model="ir.message" id="msg_user_group_process2draft">
         <field name="text">Only the users of the group "Sales process to draft" can draft a processing sale.</field>
     </record>
+    <record model="ir.message" id="msg_sale_draft_drop_shipment">
+        <field name="text">Sale "%(sale)s" cannot be returned to draft because it has shipped or completed direct shipments.</field>
+    </record>
     </data>
 </tryton>
