@@ -13,3 +13,7 @@ msgid ""
 msgstr ""
 "Sólo los usuarios del grupo \"Ventas en proceso a borrador\" pueden cambiar "
 "una venta en proceso a borrador."
+
+msgctxt "model:ir.message,text:msg_sale_draft_drop_shipment"
+msgid "Sale \"%(sale)s\" cannot be returned to draft because it has shipped or completed direct shipments."
+msgstr "La venta \"%(sale)s\" no se puede pasar a borrador porque tiene envíos directos expedidos o finalizados."
