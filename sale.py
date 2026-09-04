@@ -21,6 +21,12 @@ class Sale(metaclass=PoolMeta):
                         ['cancelled', 'quotation', 'processing'])
 
     @classmethod
+    def process(cls, sales):
+        if Transaction().context.get('_sale_processing2confirmed_draft'):
+            return
+        super().process(sales)
+
+    @classmethod
     def draft(cls, sales):
         pool = Pool()
         Invoice = pool.get('account.invoice')
@@ -78,7 +84,8 @@ class Sale(metaclass=PoolMeta):
         if to_write:
             cls.write(*to_write)
 
-        with Transaction().set_user(0):
+        with Transaction().set_user(0), Transaction().set_context(
+                _sale_processing2confirmed_draft=True):
             if to_delete_invoices:
                 Invoice.delete(to_delete_invoices)
             if to_delete_shipments:
@@ -139,7 +146,8 @@ class SaleDropShipment(metaclass=PoolMeta):
                     requests.append(request)
 
         if drop_shipments or requests or lines:
-            with Transaction().set_user(0):
+            with Transaction().set_user(0), Transaction().set_context(
+                    _sale_processing2confirmed_draft=True):
                 DropShipment.cancel([shipment for shipment in drop_shipments
                         if shipment.state != 'cancelled'])
                 DropShipment.delete(drop_shipments)
@@ -147,4 +155,5 @@ class SaleDropShipment(metaclass=PoolMeta):
                     PurchaseRequest.delete(requests)
                 if lines:
                     SaleLine.write(lines, {'purchase_request': None})
-        super().draft(sales)
+        with Transaction().set_context(_sale_processing2confirmed_draft=True):
+            super().draft(sales)
