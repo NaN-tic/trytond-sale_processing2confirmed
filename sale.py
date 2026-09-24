@@ -32,6 +32,7 @@ class Sale(metaclass=PoolMeta):
         Invoice = pool.get('account.invoice')
         ShipmentOut = pool.get('stock.shipment.out')
         ShipmentOutReturn = pool.get('stock.shipment.out.return')
+        User = pool.get('res.user')
         Group = pool.get('res.group')
         ModelData = pool.get('ir.model.data')
 
@@ -48,7 +49,7 @@ class Sale(metaclass=PoolMeta):
             SaleProduction = pool.get('sale.line-production')
 
         user_id = transaction.user
-        if user_id != 0:
+        if not User.is_administrator(user_id):
             group = Group(ModelData.get_id('sale_processing2confirmed',
                         'group_sale_process2draft')).id
             groups = transaction.context['groups']
@@ -62,7 +63,7 @@ class Sale(metaclass=PoolMeta):
             if sale.state != 'processing':
                 continue
 
-            if user_id != 0:
+            if not User.is_administrator(user_id):
                 if group not in groups:
                     raise UserError(gettext(
                         'sale_processing2confirmed.user_group_process2draft'))

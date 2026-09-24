@@ -7,9 +7,5 @@ copyright notices and license terms. -->
         <record model="res.group" id="group_sale_process2draft">
             <field name="name">Sales process to draft</field>
         </record>
-        <record model="res.user-res.group" id="user_admin_group_sale_process2draft">
-            <field name="user" ref="res.user_admin"/>
-            <field name="group" ref="group_sale_process2draft"/>
-        </record>
     </data>
 </tryton>
