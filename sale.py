@@ -52,7 +52,7 @@ class Sale(metaclass=PoolMeta):
         if not User.is_administrator(user_id):
             group = Group(ModelData.get_id('sale_processing2confirmed',
                         'group_sale_process2draft')).id
-            groups = transaction.context['groups']
+            groups = User.get_groups()
 
         to_delete_invoices = []
         to_delete_shipments = []
@@ -66,7 +66,7 @@ class Sale(metaclass=PoolMeta):
             if not User.is_administrator(user_id):
                 if group not in groups:
                     raise UserError(gettext(
-                        'sale_processing2confirmed.user_group_process2draft'))
+                        'sale_processing2confirmed.msg_user_group_process2draft'))
 
             if sale.invoices:
                 to_delete_invoices += sale.invoices

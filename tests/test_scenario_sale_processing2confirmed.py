@@ -47,7 +47,11 @@ class Test(unittest.TestCase):
         sale_user.name = 'Sale'
         sale_user.login = 'sale'
         sale_group, = Group.find([('name', '=', 'Sales')])
+        process2draft_group, = Group.find([
+                ('name', '=', 'Sales process to draft'),
+                ])
         sale_user.groups.append(sale_group)
+        sale_user.groups.append(process2draft_group)
         sale_user.save()
 
         # Create stock user
